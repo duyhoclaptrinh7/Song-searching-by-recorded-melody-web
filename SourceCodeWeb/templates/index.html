@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search By Melody</title>
+    <style>
+        /* CSS Reset */
+        body, h1, h2, p, ul, li, button {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000; /* Black background */
+            color: #fff; /* White text */
+        }
+        main {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background: #fff; /* White background for piano key effect */
+            color: #000; /* Black text for contrast */
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 1.5rem;
+            color: #000; /* Black text */
+            font-size: 2rem;
+            background: #fff; /* White background for piano key style */
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+        .description {
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+            color: #000; /* Black text */
+        }
+        button {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            color: #fff; /* White text */
+            background: #000; /* Black background for piano key style */
+            border: 2px solid #fff; /* White border for contrast */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #333; /* Dark gray for hover effect */
+            transform: scale(1.05);
+        }
+        #status {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            color: #000; /* Black text */
+            visibility: hidden; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #status.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .hidden {
+            display: none;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-in-out; /* Smooth fade-in effect */
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .tone-intervals {
+            margin: 2rem 0;
+        }
+        .tone-intervals h2 {
+            font-size: 1.4rem;
+            color: #000; /* Black text */
+            margin-bottom: 0.5rem;
+            background: #fff; /* White background for piano key style */
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+        .tone-intervals span {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #000; /* Black text */
+        }
+        .song-list {
+            margin: 2rem 0;
+        }
+        .song-list h2 {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            color: #000; /* Black text */
+            background: #fff; /* White background for piano key style */
+            padding: 0.5rem;
+            border-radius: 5px;
+        }
+        .song-list ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .song-list li {
+            background: #000; /* Black background for piano key effect */
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border: 2px solid #fff; /* White border for contrast */
+            border-radius: 5px;
+            color: #fff; /* White text */
+            transition: transform 0.2s;
+        }
+        .song-list li:hover {
+            transform: scale(1.02);
+        }
+        .song-list li a {
+            text-decoration: none;
+            color: #fff; /* White text */
+        }
+        .song-list li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Search By Melody</h1>
+        <p class="description">Sing a melody to search for songs.</p>
+        <button id="record-btn">Start Recording</button>
+        <p id="status">Recording... Please wait.</p>
+        
+        <!-- Signature of Your Melody -->
+        <div class="tone-intervals hidden" id="tone-intervals-container">
+            <h2>Signature of your melody:</h2>
+            <p><span id="tone-intervals"></span></p>
+        </div>
+        
+        <!-- Matching Songs -->
+        <div class="song-list hidden" id="song-list-container">
+            <h2>Matching Songs:</h2>
+            <ul id="results"></ul>
+        </div>
+
+        <!-- No Songs Found -->
+        <p id="no-songs-found" class="hidden">No matching songs found!</p>
+    </main>
+
+    <script>
+        const recordBtn = document.getElementById("record-btn");
+        const statusElement = document.getElementById("status");
+        const toneIntervalsContainer = document.getElementById("tone-intervals-container");
+        const toneIntervalsElement = document.getElementById("tone-intervals");
+        const songListContainer = document.getElementById("song-list-container");
+        const resultsElement = document.getElementById("results");
+        const noSongsFoundElement = document.getElementById("no-songs-found");
+
+        recordBtn.addEventListener("click", function () {
+            // Hiển thị trạng thái ghi âm
+            statusElement.classList.add("show");
+            statusElement.innerText = "Recording... Please wait.";
+            toneIntervalsContainer.classList.add("hidden");
+            songListContainer.classList.add("hidden");
+            noSongsFoundElement.classList.add("hidden"); // Ẩn thông báo "No matching songs found"
+            toneIntervalsElement.innerText = "";
+            resultsElement.innerHTML = "";
+
+            // Gửi yêu cầu đến backend
+            fetch("/process-audio", {
+                method: "POST"
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Ẩn trạng thái ghi âm
+                statusElement.classList.remove("show");
+
+                if (data.success) {
+                    // Hiển thị tone intervals với hiệu ứng fade-in
+                    toneIntervalsElement.innerText = data.tone_intervals.join(", ");
+                    toneIntervalsContainer.classList.remove("hidden");
+                    toneIntervalsContainer.classList.add("fade-in");
+
+                    // Hiển thị danh sách bài hát hoặc thông báo không tìm thấy bài hát
+                    if (data.songs.length > 0) {
+                        data.songs.forEach(song => {
+                            const li = document.createElement("li");
+                            li.innerHTML = `<strong>${song.title}</strong> - <a href="${song.audio_url}" target="_blank">Listen</a>`;
+                            resultsElement.appendChild(li);
+                        });
+                        songListContainer.classList.remove("hidden");
+                        songListContainer.classList.add("fade-in");
+                    } else {
+                        noSongsFoundElement.classList.remove("hidden");
+                    }
+                } else {
+                    statusElement.innerText = "Error: " + data.error;
+                }
+            })
+            .catch(error => {
+                // Ẩn trạng thái ghi âm và hiển thị lỗi
+                statusElement.classList.remove("show");
+                statusElement.innerText = "Error: " + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
