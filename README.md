@@ -26,19 +26,9 @@ A web app that lets users search for songs by humming or playing a short melody 
 python app.py
 ```
 
-**Demo video (add a playable demo to this README)**
+**Demo video**
 
-* **Local file (in-repo)**: place the video at `assets/demo.mp4` and embed in the README with:
-
-```html
-<video src="./assets/demo.mp4" controls width="720">Your browser does not support the video element.</video>
-```
-
-* **YouTube (external host)**: paste an iframe in the README:
-
-```html
-<iframe width="720" height="405" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" frameborder="0" allowfullscreen></iframe>
-```
+https://github.com/user-attachments/assets/60ebb341-09e1-47b4-8fce-06de2a4817b8
 
 ---
 
